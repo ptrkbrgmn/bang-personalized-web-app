@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1">
+   <title>DN User watchlist</title>
+
+  <style>
+  * {
+      box-sizing: border-box;
+  }
+  .column {
+      float: left;
+      width: 50%;
+      padding: 10px;
+      min-height: 300px;
+  }
+  .row:after {
+      content: "";
+      display: table;
+      clear: both;
+  }
+  </style>
+</head>
+<body>
+
+<script>
+var xmlhttp = new XMLHttpRequest()
+var url = "http://localhost:10001/watchlist"
+
+function getWatchlistWhenLocalStorageIsEmtpy() {
+  xmlhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+          showWatchListResponse(this)
+      }
+  };
+  xmlhttp.open("POST", url, true)
+  xmlhttp.send()
+}
+
+function getWatchlistWhenLocalStorageNotEmtpy() {
+  xmlhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+          showWatchListResponse(this)
+      }
+  };
+  xmlhttp.open("POST", url, true)
+  xmlhttp.setRequestHeader('If-Match', '"XOBNTQ3XBSQZJP2ZKHZNFGUNAU"')
+  //xmlhttp.setRequestHeader('Content-type','application/json; charset=utf-8')
+  var userWatchlist = {
+    "userId" : "456",
+    "watching" : [ {
+      "watchId" : "a1657fc9-54fg6-33fg-q8d8-123ser321321qw",
+      "entityId" : "dn.epi.456"
+    } ]
+  }
+  xmlhttp.send(JSON.stringify(userWatchlist))
+}
+
+function clearWatchlistContainer() {
+  document.getElementById("watchListContainer").innerHTML = ""
+}
+
+function showWatchListResponse(response) {
+  var headers = response.getAllResponseHeaders()
+  var arr = headers.trim().split(/[\r\n]+/)
+  arr.forEach(function (line) {
+    var parts = line.split(': ')
+    var header = parts.shift()
+    var value = parts.join(': ')
+    var headerString = header + ": " + value + "<br/>"
+    document.getElementById("watchListContainer").innerHTML += headerString
+  })
+  document.getElementById("watchListContainer").innerHTML += "<br/>"
+  document.getElementById("watchListContainer").innerHTML += response.responseText
+  document.getElementById("watchListContainer").innerHTML += "<hr/>"
+}
+</script>
+
+
+<h2>DN User watchlist</h2>
+
+<div class="row">
+  <div class="column" style="background-color:#aaa;">
+    <button onclick="getWatchlistWhenLocalStorageIsEmtpy()">getWatchlistWhenLocalStorageIsEmtpy</button><p>
+    <button onclick="getWatchlistWhenLocalStorageNotEmtpy()">getWatchlistWhenLocalStorageNotEmtpy</button><p>
+    <button onclick="clearWatchlistContainer()">clear</button><p>
+  </div>
+  <div class="column" style="background-color:#bbb;">
+    <pre id="watchListContainer"></pre>
+  </div>
+</div>
+
+</body>
+</html>
